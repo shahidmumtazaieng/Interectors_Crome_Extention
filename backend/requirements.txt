@@ -1,0 +1,7 @@
+
+langchain
+langchain-google-genai
+langchain-community
+flask
+flask-cors
+dotenv

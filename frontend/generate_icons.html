@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Icon Generator</title>
+</head>
+<body>
+    <h1>Interectors Icon Generator</h1>
+    <p>Right-click on each icon below and save as PNG:</p>
+    
+    <div id="icons">
+        <h2>16x16 Icon</h2>
+        <canvas id="icon16" width="16" height="16"></canvas>
+        
+        <h2>48x48 Icon</h2>
+        <canvas id="icon48" width="48" height="48"></canvas>
+        
+        <h2>128x128 Icon</h2>
+        <canvas id="icon128" width="128" height="128"></canvas>
+    </div>
+
+    <script>
+        function createIcon(canvasId, size) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            
+            // Fill background with #1a2a6c
+            ctx.fillStyle = '#1a2a6c';
+            ctx.fillRect(0, 0, size, size);
+            
+            // Draw circle with #ff6b6b
+            const centerX = size / 2;
+            const centerY = size / 2;
+            const radius = size / 3;
+            
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+            ctx.fillStyle = '#ff6b6b';
+            ctx.fill();
+            
+            // Draw letter "I"
+            ctx.fillStyle = 'white';
+            ctx.font = `${size / 2}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('I', centerX, centerY);
+        }
+        
+        // Generate all icons
+        createIcon('icon16', 16);
+        createIcon('icon48', 48);
+        createIcon('icon128', 128);
+    </script>
+</body>
+</html>
