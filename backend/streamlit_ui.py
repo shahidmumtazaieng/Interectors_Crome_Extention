@@ -5,9 +5,13 @@ from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 import asyncio
 from dotenv import load_dotenv
+import json
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+import threading
+import time
 
-
-
+# Load environment variables
 load_dotenv()
 
 # Set page config
@@ -125,9 +129,6 @@ with st.expander("❓ Q&A Endpoint"):
     ```
     """)
 
-# Test section
-st.header("🧪 Test the API")
-
 # Function to load and process web page
 async def process_web_page(url: str) -> str:
     """Load and extract text from a web page"""
@@ -174,6 +175,72 @@ def answer_question(text: str, question: str) -> str:
     except Exception as e:
         st.error(f"Error answering question: {str(e)}")
         return "Failed to generate answer."
+
+# Flask API setup
+flask_app = Flask(__name__)
+CORS(flask_app, origins=["chrome-extension://*"])
+
+@flask_app.route('/summarize', methods=['POST'])
+def summarize_endpoint():
+    """API endpoint for summarizing web pages"""
+    try:
+        data = request.get_json()
+        url = data.get('url')
+        
+        if not url:
+            return jsonify({"error": "URL is required"}), 400
+        
+        # Process the web page
+        page_text = asyncio.run(process_web_page(url))
+        if not page_text:
+            return jsonify({"error": "Failed to load page content"}), 500
+        
+        # Generate summary
+        summary = summarize_text(page_text)
+        return jsonify({"summary": summary})
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@flask_app.route('/qa', methods=['POST'])
+def qa_endpoint():
+    """API endpoint for answering questions about web pages"""
+    try:
+        data = request.get_json()
+        url = data.get('url')
+        question = data.get('question')
+        
+        if not url or not question:
+            return jsonify({"error": "URL and question are required"}), 400
+        
+        # Process the web page
+        page_text = asyncio.run(process_web_page(url))
+        if not page_text:
+            return jsonify({"error": "Failed to load page content"}), 500
+        
+        # Generate answer
+        answer = answer_question(page_text, question)
+        return jsonify({"answer": answer})
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@flask_app.route('/health', methods=['GET'])
+def health_check():
+    """Health check endpoint"""
+    return jsonify({"status": "healthy"}), 200
+
+# Run Flask API in a separate thread
+def run_flask():
+    flask_app.run(host='0.0.0.0', port=8000, debug=False, use_reloader=False)
+
+# Start Flask API in a separate thread
+flask_thread = threading.Thread(target=run_flask)
+flask_thread.daemon = True
+flask_thread.start()
+
+# Test section
+st.header("🧪 Test the API")
 
 # Test URL input
 test_url = st.text_input("Enter a URL to test:", "https://example.com")
