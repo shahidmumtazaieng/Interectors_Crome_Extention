@@ -15,3 +15,4 @@ if __name__ == "__main__":
     # Run the FastAPI app with Uvicorn
 
     uvicorn.run("app:app", host="https://interectorscromeextention-ia6dt2a3vdvrbrrzyx3gbn.streamlit.app/", port=port, log_level="info")
+
