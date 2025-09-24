@@ -89,7 +89,7 @@ You can also deploy this Flask API to other platforms:
 - Azure App Service
 
 For these platforms, you would typically:
-1. Use [api.py](file:///e:/FastAPi/Langchain/models/1LLM/crome%20extention/backend/api.py) as your main application file
+1. Use [api.py](file:///e:/FastAPi/Langchain/models/1LLM/crome%20extention/Interectors_Crome_Extention/backend/api.py) as your main application file
 2. Set the `GOOGLE_API_KEY` environment variable
 3. Configure the platform to run `python api.py`
 
@@ -300,3 +300,73 @@ MIT License
 ## Support
 
 For issues, feature requests, or questions, please [open an issue](https://github.com/your-username/interectors/issues) on GitHub.
+
+# Interectors Backend API
+
+This directory contains the backend API for the Interectors Chrome extension.
+
+## Files
+
+- `api_server.py` - Standalone Flask API server
+- `streamlit_app.py` - Streamlit app entry point
+- `streamlit_ui.py` - Streamlit UI components
+- `requirements.txt` - Python dependencies
+
+## Deployment Options
+
+### Option 1: Streamlit Cloud (Recommended)
+1. Deploy the Streamlit app to Streamlit Cloud
+2. The app will serve both the UI and API endpoints
+
+### Option 2: Standalone API Server
+1. Run the API server independently:
+   ```bash
+   python api_server.py
+   ```
+2. The server will start on port 8000 by default
+
+## Environment Variables
+- `GOOGLE_API_KEY` - Your Google Generative AI API key
+- `PORT` - Port to run the server on (default: 8000)
+
+## API Endpoints
+
+### Summarize
+- **Endpoint**: `/summarize`
+- **Method**: POST
+- **Request Body**:
+  ```json
+  {
+    "url": "https://example.com"
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "summary": "Page summary here..."
+  }
+  ```
+
+### Q&A
+- **Endpoint**: `/qa`
+- **Method**: POST
+- **Request Body**:
+  ```json
+  {
+    "url": "https://example.com",
+    "question": "Your question here?"
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "answer": "Answer to your question..."
+  }
+  ```
+
+## Testing
+Run the test script to verify the API is working:
+```bash
+python test_api.py
+```
+

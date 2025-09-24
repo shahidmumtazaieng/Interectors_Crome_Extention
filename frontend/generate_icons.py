@@ -1,54 +1,42 @@
 """
-Script to generate PNG icons from SVG files for the Chrome extension.
-This script uses Selenium to render SVG files and save them as PNG.
+Script to generate SVG icons from the HTML file for the Chrome extension.
+This script extracts SVG elements from the HTML and saves them as individual SVG files.
 """
 
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
+import re
 import os
-import time
 
 def generate_icons():
-    # Set up Chrome options
-    chrome_options = Options()
-    chrome_options.add_argument("--headless")  # Run in background
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    
-    # Initialize the driver
-    driver = webdriver.Chrome(options=chrome_options)
-    
     try:
-        # Get the absolute path to the generate_icons.html file
-        html_file = os.path.abspath("generate_icons.html")
-        file_url = f"file://{html_file}"
-        
-        # Load the HTML file
-        driver.get(file_url)
-        time.sleep(2)  # Wait for page to load
+        # Read the HTML file
+        with open("generate_icons.html", "r", encoding="utf-8") as file:
+            html_content = file.read()
         
         # Get the icons directory
         icons_dir = "icons"
         os.makedirs(icons_dir, exist_ok=True)
         
-        # Generate screenshots for each icon size
-        icon_sizes = [(16, 'icon16'), (48, 'icon48'), (128, 'icon128')]
+        # Find all SVG elements with IDs using regex
+        # This pattern captures the entire SVG element including all its content
+        svg_pattern = r'(<svg[^>]*id="([^"]*)"[^>]*>.*?</svg>)'
+        svg_matches = re.findall(svg_pattern, html_content, re.DOTALL)
         
-        for size, element_id in icon_sizes:
-            # Find the canvas element
-            canvas = driver.find_element("id", element_id)
-            
-            # Take screenshot of just the canvas
-            canvas.screenshot(f"{icons_dir}/{element_id}.png")
-            print(f"Generated {icons_dir}/{element_id}.png")
-            
-        print("All icons generated successfully!")
+        # Extract and save each SVG
+        for svg_full_content, svg_id in svg_matches:
+            if svg_id:
+                # Create the SVG file content with proper XML declaration
+                svg_file_content = f'<?xml version="1.0" encoding="UTF-8"?>\n{svg_full_content}'
+                
+                # Save the SVG file
+                svg_filename = f"{icons_dir}/{svg_id}.svg"
+                with open(svg_filename, "w", encoding="utf-8") as svg_file:
+                    svg_file.write(svg_file_content)
+                print(f"Generated {svg_filename}")
+        
+        print("All SVG icons generated successfully!")
         
     except Exception as e:
         print(f"Error generating icons: {e}")
-        
-    finally:
-        driver.quit()
 
 if __name__ == "__main__":
     generate_icons()

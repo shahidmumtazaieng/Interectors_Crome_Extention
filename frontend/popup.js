@@ -1,11 +1,3 @@
-// Configuration - Set to false for production deployment
-const IS_LOCAL_DEVELOPMENT = false;
-
-// API URL Configuration - Update this with your actual Streamlit app URL after deployment
-const STREAMLIT_APP_URL = IS_LOCAL_DEVELOPMENT 
-  ? "http://localhost:8000" 
-  : "https://your-streamlit-app-url.streamlit.app";
-
 // Function to get the current tab URL
 async function getCurrentTabUrl() {
   return new Promise((resolve, reject) => {
@@ -35,29 +27,30 @@ function handleApiError(elementId, error) {
 // Function to summarize the current page
 async function summarizePage() {
   try {
+    const summarizeBtn = document.getElementById("summarizeBtn");
+    summarizeBtn.disabled = true;
+    summarizeBtn.innerHTML = 'Generating...';
+    
     showLoading('summary');
     const url = await getCurrentTabUrl();
     
-    const response = await fetch(`${STREAMLIT_APP_URL}/summarize`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({url: url})
+    // Send message to background script
+    const response = await chrome.runtime.sendMessage({
+      action: "summarize",
+      url: url
     });
     
-    if (!response.ok) {
-      throw new Error(`API error: ${response.status} ${response.statusText}`);
+    if (!response.success) {
+      throw new Error(response.error);
     }
     
-    const data = await response.json();
-    if (data.error) {
-      throw new Error(data.error);
-    }
-    
-    document.getElementById("summary").innerHTML = `<p>${data.summary}</p>`;
+    document.getElementById("summary").innerHTML = `<p>${response.data.summary}</p>`;
   } catch (error) {
     handleApiError('summary', error);
+  } finally {
+    const summarizeBtn = document.getElementById("summarizeBtn");
+    summarizeBtn.disabled = false;
+    summarizeBtn.innerHTML = 'Regenerate Summary';
   }
 }
 
@@ -70,42 +63,66 @@ async function askQuestion() {
       return;
     }
     
+    const qaBtn = document.getElementById("qa-btn");
+    const qaInput = document.getElementById("qa-input");
+    
+    qaBtn.disabled = true;
+    qaBtn.innerHTML = '...';
+    qaInput.disabled = true;
+    
     showLoading('qa-content');
     const url = await getCurrentTabUrl();
     
-    const response = await fetch(`${STREAMLIT_APP_URL}/qa`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        url: url,
-        question: question
-      })
+    // Send message to background script
+    const response = await chrome.runtime.sendMessage({
+      action: "askQuestion",
+      url: url,
+      question: question
     });
     
-    if (!response.ok) {
-      throw new Error(`API error: ${response.status} ${response.statusText}`);
+    if (!response.success) {
+      throw new Error(response.error);
     }
     
-    const data = await response.json();
-    if (data.error) {
-      throw new Error(data.error);
+    // Add the Q&A response to the content
+    const currentContent = document.getElementById("qa-content").innerHTML;
+    const emptyState = document.getElementById("qa-content").querySelector('.empty-state');
+    
+    if (emptyState) {
+      document.getElementById("qa-content").innerHTML = '';
     }
     
-    document.getElementById("qa-content").innerHTML = `<p><strong>Q:</strong> ${question}</p><p><strong>A:</strong> ${data.answer}</p>`;
+    const responseDiv = document.createElement('div');
+    responseDiv.className = 'qa-response';
+    responseDiv.innerHTML = `
+      <div class="qa-question">Q: ${question}</div>
+      <div>A: ${response.data.answer}</div>
+    `;
+    document.getElementById("qa-content").insertBefore(responseDiv, document.getElementById("qa-content").firstChild);
+    
+    // Clear input and reset button
+    document.getElementById("qa-input").value = '';
   } catch (error) {
     handleApiError('qa-content', error);
+  } finally {
+    const qaBtn = document.getElementById("qa-btn");
+    const qaInput = document.getElementById("qa-input");
+    qaBtn.disabled = false;
+    qaBtn.innerHTML = 'Ask';
+    qaInput.disabled = false;
+    qaInput.focus();
   }
 }
 
 // Event listeners
-document.getElementById("summarizeBtn").addEventListener("click", summarizePage);
-document.getElementById("qa-btn").addEventListener("click", askQuestion);
-
-// Allow Enter key to submit question
-document.getElementById("qa-input").addEventListener("keypress", function(event) {
-  if (event.key === "Enter") {
-    askQuestion();
-  }
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById("summarizeBtn").addEventListener("click", summarizePage);
+  document.getElementById("qa-btn").addEventListener("click", askQuestion);
+  
+  // Allow Enter key to submit question
+  document.getElementById("qa-input").addEventListener("keypress", function(event) {
+    if (event.key === "Enter") {
+      askQuestion();
+    }
+  });
 });

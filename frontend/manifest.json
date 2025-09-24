@@ -4,6 +4,13 @@
   "version": "1.0",
   "description": "AI-powered webpage summarizer and Q&A assistant",
   "permissions": ["activeTab", "scripting"],
+  "host_permissions": [
+    "https://interectorscromeextention-igrjcyl4beuxpt2xof4kmq.streamlit.app/*",
+    "http://localhost:8501/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
