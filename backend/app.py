@@ -33,7 +33,7 @@ class QARequest(BaseModel):
 
 # Use Langchain ChatGoogleGenerativeAI model as requested
 load_dotenv()
-model = ChatGoogleGenerativeAI(model="gemini-1.5-flash")
+model = ChatGoogleGenerativeAI(model="gemini-2.5-flash")
 
 async def process_web_page(url: str) -> str:
     """Load and extract text from a web page"""
@@ -91,4 +91,5 @@ async def root():
 # Vercel requires the app to be exported as 'app'
 # This is for local development
 if __name__ == "__main__":
+
     uvicorn.run(app, host="0.0.0.0", port=8000)
