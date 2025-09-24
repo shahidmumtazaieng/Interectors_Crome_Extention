@@ -39,7 +39,7 @@ except Exception as e:
     print(f"Warning: Could not initialize gemini-2.5-flash model: {e}")
     try:
         # Fallback to a known working model
-        model = ChatGoogleGenerativeAI(model="gemini-1.5-flash")
+        model = ChatGoogleGenerativeAI(model="gemini-2.5-flash")
     except Exception as e2:
         print(f"Error: Could not initialize fallback model: {e2}")
         raise
@@ -110,4 +110,5 @@ async def root():
 # Vercel requires the app to be exported as 'app'
 # This is for local development
 if __name__ == "__main__":
+
     uvicorn.run(app, host="0.0.0.0", port=8000)
