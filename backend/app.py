@@ -18,10 +18,11 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["chrome-extension://*"],
+    allow_origins=["chrome-extension://*", "*"],  # Allow all origins for testing
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"]
 )
 
 class SummarizeRequest(BaseModel):
@@ -31,8 +32,17 @@ class QARequest(BaseModel):
     url: str
     question: str
 
-# Configure the model directly with simplified API key usage
-model = ChatGoogleGenerativeAI(model="gemini-2.5-flash")
+# Configure the model with error handling
+try:
+    model = ChatGoogleGenerativeAI(model="gemini-2.5-flash")
+except Exception as e:
+    print(f"Warning: Could not initialize gemini-2.5-flash model: {e}")
+    try:
+        # Fallback to a known working model
+        model = ChatGoogleGenerativeAI(model="gemini-1.5-flash")
+    except Exception as e2:
+        print(f"Error: Could not initialize fallback model: {e2}")
+        raise
 
 # Define prompt templates
 summary_template = PromptTemplate.from_template(
@@ -43,7 +53,7 @@ qa_template = PromptTemplate.from_template(
     "Use the following content to answer the question.\n\nContent:\n{content}\n\nQuestion: {question}\n\nAnswer:"
 )
 
-async def process_web_page(url: str) -> str:
+def process_web_page(url: str) -> str:
     """Load and extract text from a web page"""
     try:
         loader = WebBaseLoader(url)
@@ -91,6 +101,11 @@ async def qa(req: QARequest):
 @app.get("/health")
 async def health_check():
     return {"status": "healthy"}
+
+# Add a root endpoint for testing
+@app.get("/")
+async def root():
+    return {"message": "Interectors API is running"}
 
 # Vercel requires the app to be exported as 'app'
 # This is for local development
