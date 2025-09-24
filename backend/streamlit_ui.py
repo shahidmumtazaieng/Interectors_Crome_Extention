@@ -108,6 +108,7 @@ if "STREAMLIT_API_MODE" in os.environ:
         """Health check endpoint"""
         return jsonify({"status": "healthy"}), 200
 
+    # Only run the app if this file is executed directly
     if __name__ == '__main__':
         port = int(os.environ.get('PORT', 8000))
         app.run(host='0.0.0.0', port=port, debug=False)
