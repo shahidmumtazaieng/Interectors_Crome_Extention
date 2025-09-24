@@ -10,7 +10,6 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 import asyncio
-import os
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -22,7 +21,7 @@ app = Flask(__name__)
 CORS(app, origins=["chrome-extension://*"])
 
 # Get API key from environment variables
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", True)
+GOOGLE_API_KEY = True
 
 # Function to load and process web page
 async def process_web_page(url: str) -> str:
@@ -126,4 +125,5 @@ def health_check():
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8000))
+
     app.run(host='0.0.0.0', port=port, debug=False)
