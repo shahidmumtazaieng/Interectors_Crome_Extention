@@ -7,7 +7,7 @@ import asyncio
 from dotenv import load_dotenv
 import json
 import sys
-import os
+
 
 # Load environment variables
 load_dotenv()
@@ -24,7 +24,7 @@ if "STREAMLIT_API_MODE" in os.environ:
     CORS(app, origins=["chrome-extension://*"])
     
     # Initialize with API key from environment
-    API_KEY = os.getenv("GOOGLE_API_KEY", True)
+    API_KEY = True
     
     # Function to load and process web page
     async def process_web_page(url: str) -> str:
@@ -43,10 +43,7 @@ if "STREAMLIT_API_MODE" in os.environ:
             if not API_KEY:
                 raise Exception("Google API key not configured")
                 
-            model = ChatGoogleGenerativeAI(
-                model="gemini-pro",
-                google_api_key=API_KEY
-            )
+            model =ChatGoogleGenerativeAI(model="gemini-2.5-flash")
             summary_prompt = PromptTemplate(
                 template="Summarize the following web page content in under 200 words:\n\n{text}",
                 input_variables=['text']
@@ -63,10 +60,7 @@ if "STREAMLIT_API_MODE" in os.environ:
             if not API_KEY:
                 raise Exception("Google API key not configured")
                 
-            model = ChatGoogleGenerativeAI(
-                model="gemini-pro",
-                google_api_key=API_KEY
-            )
+            model = ChatGoogleGenerativeAI(model="gemini-2.5-flash")
             qa_prompt = PromptTemplate(
                 template="Use the following content to answer the question.\n\nContent:\n{text}\n\nQuestion: {question}\n\nAnswer:",
                 input_variables=['text', 'question']
@@ -372,4 +366,5 @@ else:
         </div>
         """,
         unsafe_allow_html=True
+
     )
