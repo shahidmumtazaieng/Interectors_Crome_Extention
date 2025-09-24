@@ -7,9 +7,8 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from langchain_community.document_loaders import WebBaseLoader
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_core.prompts import PromptTemplate
-from langchain_core.output_parsers import StrOutputParser
 import asyncio
+import os
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -20,8 +19,8 @@ app = Flask(__name__)
 # Enable CORS for Chrome extensions
 CORS(app, origins=["chrome-extension://*"])
 
-# Get API key from environment variables
-GOOGLE_API_KEY = True
+# Configure the model directly
+model = ChatGoogleGenerativeAI(model="gemini-2.5-flash")
 
 # Function to load and process web page
 async def process_web_page(url: str) -> str:
@@ -37,16 +36,11 @@ async def process_web_page(url: str) -> str:
 def summarize_text(text: str) -> str:
     """Generate a summary of the provided text"""
     try:
-        if not GOOGLE_API_KEY:
-            raise Exception("Google API key not configured")
-            
-        model = ChatGoogleGenerativeAI(model="gemini-2.5-flash")
-        summary_prompt = PromptTemplate(
-            template="Summarize the following web page content in under 200 words:\n\n{text}",
-            input_variables=['text']
-        )
-        summarize_chain = summary_prompt | model | StrOutputParser()
-        return summarize_chain.invoke({"text": text})
+        prompt = f"Summarize the following web page content in under 200 words:\n\n{text}"
+        
+        # Use the model directly
+        response = model.invoke(prompt)
+        return response.content
     except Exception as e:
         raise Exception(f"Error summarizing text: {str(e)}")
 
@@ -54,16 +48,11 @@ def summarize_text(text: str) -> str:
 def answer_question(text: str, question: str) -> str:
     """Answer a question based on the provided text"""
     try:
-        if not GOOGLE_API_KEY:
-            raise Exception("Google API key not configured")
-            
-        model = ChatGoogleGenerativeAI(model="gemini-2.5-flash")
-        qa_prompt = PromptTemplate(
-            template="Use the following content to answer the question.\n\nContent:\n{text}\n\nQuestion: {question}\n\nAnswer:",
-            input_variables=['text', 'question']
-        )
-        qa_chain = qa_prompt | model | StrOutputParser()
-        return qa_chain.invoke({"text": text, "question": question})
+        prompt = f"Use the following content to answer the question.\n\nContent:\n{text}\n\nQuestion: {question}\n\nAnswer:"
+        
+        # Use the model directly
+        response = model.invoke(prompt)
+        return response.content
     except Exception as e:
         raise Exception(f"Error answering question: {str(e)}")
 
@@ -119,6 +108,4 @@ def health_check():
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8000))
-
     app.run(host='0.0.0.0', port=port, debug=False)
-
