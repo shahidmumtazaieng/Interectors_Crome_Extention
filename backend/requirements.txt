@@ -3,4 +3,5 @@ uvicorn
 langchain-community
 python-dotenv
 google-generativeai
+beautifulsoup4
 pydantic
