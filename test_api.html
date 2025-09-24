@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Interectors API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px 0;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button:disabled {
+            background-color: #cccccc;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0 15px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Interectors API</h1>
+    
+    <div class="container">
+        <h2>API Information</h2>
+        <div class="status info">
+            <p><strong>Base URL:</strong> http://localhost:8000</p>
+            <p><strong>Note:</strong> If you're getting CORS errors, make sure your backend is properly configured to accept requests from this origin.</p>
+        </div>
+        <div class="status warning">
+            <p><strong>Troubleshooting Network Errors:</strong></p>
+            <ol>
+                <li>Check your internet connection</li>
+                <li>Verify the API URL is correct</li>
+                <li>Check if the local server is running</li>
+                <li>Ensure GOOGLE_API_KEY is set in your .env file</li>
+                <li>Try accessing the API directly in your browser: 
+                    <a href="http://localhost:8000/health" target="_blank">
+                        Health Endpoint
+                    </a>
+                </li>
+            </ol>
+        </div>
+    </div>
+    
+    <div class="container">
+        <h2>Health Check</h2>
+        <button id="healthBtn">Test Health Endpoint</button>
+        <pre id="healthResult">Click the button to test</pre>
+    </div>
+    
+    <div class="container">
+        <h2>Root Endpoint</h2>
+        <button id="rootBtn">Test Root Endpoint</button>
+        <pre id="rootResult">Click the button to test</pre>
+    </div>
+    
+    <div class="container">
+        <h2>Summarize Web Page</h2>
+        <label for="urlInput">URL:</label>
+        <input type="text" id="urlInput" placeholder="Enter URL to summarize" value="https://httpbin.org/html">
+        <button id="summarizeBtn">Summarize Page</button>
+        <pre id="summarizeResult">Enter a URL and click the button to summarize</pre>
+    </div>
+    
+    <div class="container">
+        <h2>Ask Question</h2>
+        <label for="qaUrlInput">URL:</label>
+        <input type="text" id="qaUrlInput" placeholder="Enter URL" value="https://httpbin.org/html">
+        <label for="questionInput">Question:</label>
+        <input type="text" id="questionInput" placeholder="Enter your question" value="What is this page about?">
+        <button id="qaBtn">Ask Question</button>
+        <pre id="qaResult">Enter a URL and question, then click the button</pre>
+    </div>
+
+    <script>
+        const BASE_URL = 'http://localhost:8000';
+        
+        // Generic function to make API calls with better error handling
+        async function makeApiCall(url, options = {}) {
+            try {
+                const response = await fetch(url, {
+                    method: 'GET',
+                    ...options,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    }
+                });
+                
+                let data;
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    data = await response.json();
+                } else {
+                    data = await response.text();
+                }
+                
+                return {
+                    status: response.status,
+                    ok: response.ok,
+                    data: data,
+                    headers: Object.fromEntries(response.headers.entries())
+                };
+            } catch (error) {
+                return {
+                    status: 0,
+                    ok: false,
+                    error: error.message,
+                    headers: {}
+                };
+            }
+        }
+        
+        // Test Root Endpoint
+        document.getElementById('rootBtn').addEventListener('click', async function() {
+            const button = this;
+            const resultElement = document.getElementById('rootResult');
+            
+            try {
+                button.disabled = true;
+                button.textContent = 'Testing...';
+                resultElement.textContent = 'Testing root endpoint...';
+                
+                const result = await makeApiCall(`${BASE_URL}/`);
+                
+                if (result.ok) {
+                    resultElement.innerHTML = `<div class="status success">Status: ${result.status}\nResponse: ${JSON.stringify(result.data, null, 2)}</div>`;
+                } else if (result.status === 0) {
+                    resultElement.innerHTML = `<div class="status error">Network Error: ${result.error}\n\nThis could be due to:\n1. CORS issues\n2. Network connectivity problems\n3. Server not responding\n4. Invalid API endpoint\n\nTry accessing the API directly in your browser to verify it's working.</div>`;
+                } else {
+                    resultElement.innerHTML = `<div class="status error">Error: ${result.status} - ${result.data || 'Unknown error'}</div>`;
+                }
+            } catch (error) {
+                resultElement.innerHTML = `<div class="status error">Error: ${error.message}</div>`;
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Test Root Endpoint';
+            }
+        });
+        
+        // Test Health Endpoint
+        document.getElementById('healthBtn').addEventListener('click', async function() {
+            const button = this;
+            const resultElement = document.getElementById('healthResult');
+            
+            try {
+                button.disabled = true;
+                button.textContent = 'Testing...';
+                resultElement.textContent = 'Testing health endpoint...';
+                
+                const result = await makeApiCall(`${BASE_URL}/health`);
+                
+                if (result.ok) {
+                    resultElement.innerHTML = `<div class="status success">Status: ${result.status}\nResponse: ${JSON.stringify(result.data, null, 2)}</div>`;
+                } else if (result.status === 0) {
+                    resultElement.innerHTML = `<div class="status error">Network Error: ${result.error}\n\nThis could be due to:\n1. CORS issues\n2. Network connectivity problems\n3. Server not responding\n4. Invalid API endpoint\n\nTry accessing the API directly in your browser to verify it's working.</div>`;
+                } else {
+                    resultElement.innerHTML = `<div class="status error">Error: ${result.status} - ${result.data || 'Unknown error'}</div>`;
+                }
+            } catch (error) {
+                resultElement.innerHTML = `<div class="status error">Error: ${error.message}</div>`;
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Test Health Endpoint';
+            }
+        });
+        
+        // Test Summarize Endpoint
+        document.getElementById('summarizeBtn').addEventListener('click', async function() {
+            const button = this;
+            const urlInput = document.getElementById('urlInput');
+            const resultElement = document.getElementById('summarizeResult');
+            const url = urlInput.value.trim();
+            
+            if (!url) {
+                resultElement.innerHTML = '<div class="status error">Please enter a URL</div>';
+                return;
+            }
+            
+            try {
+                button.disabled = true;
+                button.textContent = 'Summarizing...';
+                resultElement.textContent = 'Processing...';
+                
+                const result = await makeApiCall(`${BASE_URL}/summarize`, {
+                    method: 'POST',
+                    body: JSON.stringify({ url: url })
+                });
+                
+                if (result.ok) {
+                    resultElement.innerHTML = `<div class="status success">Status: ${result.status}\nResponse: ${JSON.stringify(result.data, null, 2)}</div>`;
+                } else if (result.status === 0) {
+                    resultElement.innerHTML = `<div class="status error">Network Error: ${result.error}\n\nThis could be due to:\n1. CORS issues\n2. Network connectivity problems\n3. Server not responding\n4. Invalid API endpoint\n\nTry accessing the API directly in your browser to verify it's working.</div>`;
+                } else {
+                    resultElement.innerHTML = `<div class="status error">Error: ${result.status} - ${result.data?.error || result.data || 'Unknown error'}</div>`;
+                }
+            } catch (error) {
+                resultElement.innerHTML = `<div class="status error">Error: ${error.message}</div>`;
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Summarize Page';
+            }
+        });
+        
+        // Test QA Endpoint
+        document.getElementById('qaBtn').addEventListener('click', async function() {
+            const button = this;
+            const urlInput = document.getElementById('qaUrlInput');
+            const questionInput = document.getElementById('questionInput');
+            const resultElement = document.getElementById('qaResult');
+            const url = urlInput.value.trim();
+            const question = questionInput.value.trim();
+            
+            if (!url) {
+                resultElement.innerHTML = '<div class="status error">Please enter a URL</div>';
+                return;
+            }
+            
+            if (!question) {
+                resultElement.innerHTML = '<div class="status error">Please enter a question</div>';
+                return;
+            }
+            
+            try {
+                button.disabled = true;
+                button.textContent = 'Asking...';
+                resultElement.textContent = 'Processing...';
+                
+                const result = await makeApiCall(`${BASE_URL}/qa`, {
+                    method: 'POST',
+                    body: JSON.stringify({ 
+                        url: url,
+                        question: question
+                    })
+                });
+                
+                if (result.ok) {
+                    resultElement.innerHTML = `<div class="status success">Status: ${result.status}\nResponse: ${JSON.stringify(result.data, null, 2)}</div>`;
+                } else if (result.status === 0) {
+                    resultElement.innerHTML = `<div class="status error">Network Error: ${result.error}\n\nThis could be due to:\n1. CORS issues\n2. Network connectivity problems\n3. Server not responding\n4. Invalid API endpoint\n\nTry accessing the API directly in your browser to verify it's working.</div>`;
+                } else {
+                    resultElement.innerHTML = `<div class="status error">Error: ${result.status} - ${result.data?.error || result.data || 'Unknown error'}</div>`;
+                }
+            } catch (error) {
+                resultElement.innerHTML = `<div class="status error">Error: ${error.message}</div>`;
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Ask Question';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Interectors</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 500px;
+            height: 600px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: #1a202c;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #10b981, #06d6a0, #1dd1a1);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 4px;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            color: #a0aec0;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .developer-link {
+            font-size: 11px;
+            color: #10b981;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .developer-link:hover {
+            color: #06d6a0;
+        }
+
+        .container {
+            padding: 20px;
+            height: calc(100% - 120px);
+            overflow-y: auto;
+        }
+
+        .container::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .container::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        .container::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 2px;
+        }
+
+        .section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s ease;
+        }
+
+        .section:hover {
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            transform: translateY(-1px);
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a202c;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 16px;
+            background: linear-gradient(135deg, #10b981, #06d6a0);
+            border-radius: 2px;
+        }
+
+        .primary-button {
+            background: linear-gradient(135deg, #10b981 0%, #06d6a0 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 16px;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+        }
+
+        .primary-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .primary-button:active {
+            transform: translateY(0);
+        }
+
+        .primary-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        #summary, #qa-content {
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 16px;
+            background: #f8fafc;
+            border-radius: 8px;
+            font-size: 13px;
+            line-height: 1.5;
+            color: #4a5568;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 16px;
+        }
+
+        #summary::-webkit-scrollbar, #qa-content::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        #summary::-webkit-scrollbar-track, #qa-content::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        #summary::-webkit-scrollbar-thumb, #qa-content::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 2px;
+        }
+
+        .qa-container {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .qa-input {
+            flex: 1;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 2px solid #e2e8f0;
+            background: white;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            color: #1a202c;
+            height: 50px;
+        }
+
+        .qa-input:focus {
+            outline: none;
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+
+        .qa-input::placeholder {
+            color: #a0aec0;
+        }
+
+        .qa-button {
+            background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            min-width: 60px;
+        }
+
+        .qa-button:hover {
+            background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+            transform: translateY(-1px);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .loading::before {
+            content: '';
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #e5e7eb;
+            border-top: 2px solid #10b981;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .status-indicator {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            box-shadow: 0 0 0 2px white, 0 0 0 3px #10b981;
+        }
+
+        .feature-badge {
+            display: inline-flex;
+            align-items: center;
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            color: #047857;
+            font-size: 11px;
+            font-weight: 500;
+            padding: 4px 8px;
+            border-radius: 12px;
+            margin-left: auto;
+        }
+
+        .qa-response {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            font-size: 13px;
+            line-height: 1.4;
+            color: #4a5568;
+        }
+
+        .qa-question {
+            font-weight: 500;
+            color: #1a202c;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .qa-answer {
+            color: #4a5568;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 20px;
+            color: #9ca3af;
+            font-size: 13px;
+        }
+
+        .empty-state-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+            opacity: 0.5;
+        }
+
+        .error {
+            color: #e53e3e;
+            padding: 12px;
+            background: #fef2f2;
+            border-radius: 8px;
+            border: 1px solid #fed7d7;
+            font-size: 13px;
+        }
+
+        /* HTML content formatting */
+        .summary-content h1, .summary-content h2, .summary-content h3,
+        .qa-answer h1, .qa-answer h2, .qa-answer h3 {
+            font-size: 14px;
+            font-weight: 600;
+            margin: 8px 0 4px 0;
+            color: #1a202c;
+        }
+
+        .summary-content p, .qa-answer p {
+            margin: 0 0 8px 0;
+            line-height: 1.4;
+        }
+
+        .summary-content ul, .summary-content ol,
+        .qa-answer ul, .qa-answer ol {
+            margin: 8px 0 8px 20px;
+            padding: 0;
+        }
+
+        .summary-content li, .qa-answer li {
+            margin: 4px 0;
+        }
+
+        .summary-content strong, .qa-answer strong {
+            font-weight: 600;
+        }
+
+        .summary-content em, .qa-answer em {
+            font-style: italic;
+        }
+
+        .summary-content br, .qa-answer br {
+            display: block;
+            margin: 4px 0;
+        }
+
+        /* Visualization section */
+        .visualization-container {
+            margin-top: 15px;
+            padding: 10px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .visualization-title {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #4a5568;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 150px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .chart-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chart-label {
+            width: 120px;
+            font-size: 12px;
+            color: #4a5568;
+        }
+
+        .chart-bar-container {
+            flex: 1;
+            height: 20px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .chart-bar-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        .chart-value {
+            width: 40px;
+            text-align: right;
+            font-size: 12px;
+            color: #4a5568;
+        }
+
+        .keywords-container {
+            margin-top: 10px;
+            font-size: 12px;
+        }
+
+        .keywords-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #4a5568;
+        }
+
+        .keywords-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .keyword-tag {
+            background: #e2e8f0;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+        }
+
+        /* Semantic keywords section */
+        .keywords-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .keyword-card {
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 8px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .keyword-card:hover {
+            background: #e2e8f0;
+            transform: translateY(-1px);
+        }
+
+        .keyword-card .keyword {
+            font-weight: 500;
+            color: #1a202c;
+            margin-bottom: 4px;
+            word-break: break-word;
+        }
+
+        .keyword-card .frequency {
+            font-size: 11px;
+            color: #718096;
+        }
+
+        .copy-button {
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 11px;
+            cursor: pointer;
+            margin-top: 8px;
+            width: 100%;
+        }
+
+        .copy-button:hover {
+            background: #06d6a0;
+        }
+
+        .copy-notification {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-size: 14px;
+            z-index: 1000;
+            display: none;
+        }
+
+        /* Optimization note */
+        .optimization-note {
+            font-size: 11px;
+            color: #718096;
+            text-align: center;
+            margin-top: 8px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="status-indicator"></div>
+        <h1>Interectors</h1>
+        <p>AI-powered webpage assistant</p>
+        <a href="https://www.linkedin.com/in/shahidmumtazsoftwareengineer/" class="developer-link" target="_blank">
+            Developed by Shahid Mumtaz
+        </a>
+    </div>
+
+    <div class="container">
+        <div class="section">
+            <h2 class="section-title">
+                Page Summary
+                <span class="feature-badge">AI Powered</span>
+            </h2>
+            <div id="summary">
+                <div class="empty-state">
+                    <div class="empty-state-icon">📄</div>
+                    Click "Generate Summary" to analyze this webpage
+                </div>
+            </div>
+            <button id="summarizeBtn" class="primary-button">Generate Summary</button>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">
+                Ask Questions
+                <span class="feature-badge">Interactive</span>
+            </h2>
+            <div id="qa-content">
+                <div class="empty-state">
+                    <div class="empty-state-icon">💬</div>
+                    Ask a question to get started
+                </div>
+            </div>
+            <div class="qa-container">
+                <input type="text" id="qa-input" class="qa-input" placeholder="Ask anything about this page...">
+                <button id="qa-btn" class="qa-button">Ask</button>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="copy-notification" id="copyNotification">Keywords copied to clipboard!</div>
+
+    <script src="popup.js"></script>
+</body>
+</html>
