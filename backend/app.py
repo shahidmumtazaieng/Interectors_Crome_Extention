@@ -64,4 +64,5 @@ async def health_check():
     return {"status": "healthy"}
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+
+    uvicorn.run(app, host="https://interectorscromeextention-ia6dt2a3vdvrbrrzyx3gbn.streamlit.app/", port=8000)
