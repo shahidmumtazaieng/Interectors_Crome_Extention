@@ -1,23 +1,28 @@
 import streamlit as st
 from langchain_community.document_loaders import WebBaseLoader
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_core.prompts import PromptTemplate
-from langchain_core.output_parsers import StrOutputParser
 import asyncio
 from dotenv import load_dotenv
 import json
 import sys
-
+import os
 
 # Load environment variables
 load_dotenv()
 
+# Check if this is an API request (when running as a module)
+if "STREAMLIT_API_MODE" in os.environ:
+    # API mode - handle requests directly
+    import sys
+    import json
+    from flask import Flask, request, jsonify
+    from flask_cors import CORS
     
     app = Flask(__name__)
     CORS(app, origins=["chrome-extension://*"])
     
-    # Initialize with API key from environment
-    API_KEY = True
+    # Configure the model directly
+    model = ChatGoogleGenerativeAI(model="gemini-2.5-flash")
     
     # Function to load and process web page
     async def process_web_page(url: str) -> str:
@@ -33,16 +38,11 @@ load_dotenv()
     def summarize_text(text: str) -> str:
         """Generate a summary of the provided text"""
         try:
-            if not API_KEY:
-                raise Exception("Google API key not configured")
-                
-            model =ChatGoogleGenerativeAI(model="gemini-2.5-flash")
-            summary_prompt = PromptTemplate(
-                template="Summarize the following web page content in under 200 words:\n\n{text}",
-                input_variables=['text']
-            )
-            summarize_chain = summary_prompt | model | StrOutputParser()
-            return summarize_chain.invoke({"text": text})
+            prompt = f"Summarize the following web page content in under 200 words:\n\n{text}"
+            
+            # Use the model directly
+            response = model.invoke(prompt)
+            return response.content
         except Exception as e:
             raise Exception(f"Error summarizing text: {str(e)}")
 
@@ -50,16 +50,11 @@ load_dotenv()
     def answer_question(text: str, question: str) -> str:
         """Answer a question based on the provided text"""
         try:
-            if not API_KEY:
-                raise Exception("Google API key not configured")
-                
-            model = ChatGoogleGenerativeAI(model="gemini-2.5-flash")
-            qa_prompt = PromptTemplate(
-                template="Use the following content to answer the question.\n\nContent:\n{text}\n\nQuestion: {question}\n\nAnswer:",
-                input_variables=['text', 'question']
-            )
-            qa_chain = qa_prompt | model | StrOutputParser()
-            return qa_chain.invoke({"text": text, "question": question})
+            prompt = f"Use the following content to answer the question.\n\nContent:\n{text}\n\nQuestion: {question}\n\nAnswer:"
+            
+            # Use the model directly
+            response = model.invoke(prompt)
+            return response.content
         except Exception as e:
             raise Exception(f"Error answering question: {str(e)}")
 
@@ -121,13 +116,14 @@ else:
     import streamlit as st
     from langchain_community.document_loaders import WebBaseLoader
     from langchain_google_genai import ChatGoogleGenerativeAI
-    from langchain_core.prompts import PromptTemplate
-    from langchain_core.output_parsers import StrOutputParser
     import asyncio
     from dotenv import load_dotenv
 
     # Load environment variables
     load_dotenv()
+
+    # Configure the model directly
+    model = ChatGoogleGenerativeAI(model="gemini-2.5-flash")
 
     # Set page config
     st.set_page_config(
@@ -259,16 +255,11 @@ else:
     def summarize_text(text: str) -> str:
         """Generate a summary of the provided text"""
         try:
-            model = ChatGoogleGenerativeAI(
-                model="gemini-pro",
-                google_api_key=st.session_state.api_key
-            )
-            summary_prompt = PromptTemplate(
-                template="Summarize the following web page content in under 200 words:\n\n{text}",
-                input_variables=['text']
-            )
-            summarize_chain = summary_prompt | model | StrOutputParser()
-            return summarize_chain.invoke({"text": text})
+            prompt = f"Summarize the following web page content in under 200 words:\n\n{text}"
+            
+            # Use the model directly
+            response = model.invoke(prompt)
+            return response.content
         except Exception as e:
             st.error(f"Error summarizing text: {str(e)}")
             return "Failed to generate summary."
@@ -277,16 +268,11 @@ else:
     def answer_question(text: str, question: str) -> str:
         """Answer a question based on the provided text"""
         try:
-            model = ChatGoogleGenerativeAI(
-                model="gemini-pro",
-                google_api_key=st.session_state.api_key
-            )
-            qa_prompt = PromptTemplate(
-                template="Use the following content to answer the question.\n\nContent:\n{text}\n\nQuestion: {question}\n\nAnswer:",
-                input_variables=['text', 'question']
-            )
-            qa_chain = qa_prompt | model | StrOutputParser()
-            return qa_chain.invoke({"text": text, "question": question})
+            prompt = f"Use the following content to answer the question.\n\nContent:\n{text}\n\nQuestion: {question}\n\nAnswer:"
+            
+            # Use the model directly
+            response = model.invoke(prompt)
+            return response.content
         except Exception as e:
             st.error(f"Error answering question: {str(e)}")
             return "Failed to generate answer."
@@ -359,6 +345,4 @@ else:
         </div>
         """,
         unsafe_allow_html=True
-
     )
-
