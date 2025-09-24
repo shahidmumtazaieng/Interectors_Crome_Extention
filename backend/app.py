@@ -1,26 +1,27 @@
 from fastapi import FastAPI, Request, HTTPException
 from pydantic import BaseModel
 from langchain_community.document_loaders import WebBaseLoader
+from langchain_google_genai import ChatGoogleGenerativeAI
 import uvicorn
 import asyncio
 from dotenv import load_dotenv
 import os
-import google.generativeai as genai
 
 # Load environment variables
 load_dotenv()
 
 app = FastAPI()
 
-# Add CORS middleware for Chrome extension communication
+# Add comprehensive CORS middleware for Chrome extension communication
 from fastapi.middleware.cors import CORSMiddleware
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["chrome-extension://*"],
+    allow_origins=["*"],  # Allow all origins for maximum compatibility
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"]
 )
 
 class SummarizeRequest(BaseModel):
@@ -30,11 +31,9 @@ class QARequest(BaseModel):
     url: str
     question: str
 
-# Simplified model initialization as requested
+# Use Langchain ChatGoogleGenerativeAI model as requested
 load_dotenv()
-api_key = os.getenv("GOOGLE_API_KEY")
-genai.configure(api_key=api_key)
-model = genai.GenerativeModel('gemini-2.5-flash')
+model = ChatGoogleGenerativeAI(model="gemini-1.5-flash")
 
 async def process_web_page(url: str) -> str:
     """Load and extract text from a web page"""
@@ -55,9 +54,9 @@ async def summarize(req: SummarizeRequest):
             raise HTTPException(status_code=400, detail="Failed to extract content from the provided URL")
         
         # Generate summary using simple custom prompt
-        prompt = f"Summarize the following web page content in under 300 words:\n\n{page_text}"
-        response = model.generate_content(prompt)
-        return {"summary": response.text}
+        prompt = f"Summarize the following web page content in under 200 words:\n\n{page_text}"
+        response = model.invoke(prompt)
+        return {"summary": response.content}
     except HTTPException:
         raise
     except Exception as e:
@@ -74,8 +73,8 @@ async def qa(req: QARequest):
         
         # Generate answer using simple custom prompt
         prompt = f"Use the following content to answer the question.\n\nContent:\n{page_text}\n\nQuestion: {req.question}\n\nAnswer:"
-        response = model.generate_content(prompt)
-        return {"answer": response.text}
+        response = model.invoke(prompt)
+        return {"answer": response.content}
     except HTTPException:
         raise
     except Exception as e:
@@ -84,6 +83,10 @@ async def qa(req: QARequest):
 @app.get("/health")
 async def health_check():
     return {"status": "healthy"}
+
+@app.get("/")
+async def root():
+    return {"message": "Interectors API is running"}
 
 # Vercel requires the app to be exported as 'app'
 # This is for local development
