@@ -4,6 +4,13 @@ from langchain_community.document_loaders import WebBaseLoader
 from langchain_google_genai import ChatGoogleGenerativeAI
 import uvicorn
 import asyncio
+from dotenv import load_dotenv
+import json
+
+import sys
+
+# Load environment variables
+load_dotenv()
 
 app = FastAPI()
 
