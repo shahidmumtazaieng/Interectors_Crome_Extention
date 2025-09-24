@@ -5,5 +5,5 @@ langchain-google-genai
 langchain-community
 dotenv
 google-generativeai
-beautifulsoup4
 requests
+
