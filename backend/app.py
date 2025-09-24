@@ -37,9 +37,7 @@ class QARequest(BaseModel):
 def initialize_model():
     """Initialize the Google Generative AI model with fallback options"""
     models_to_try = [
-        "gemini-2.5-flash",
-        "gemini-pro",
-        "gemini-1.5-flash"
+        "gemini-2.5-flash"
     ]
     
     api_key = os.getenv("GOOGLE_API_KEY")
