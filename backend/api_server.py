@@ -40,10 +40,7 @@ def summarize_text(text: str) -> str:
         if not GOOGLE_API_KEY:
             raise Exception("Google API key not configured")
             
-        model = ChatGoogleGenerativeAI(
-            model="gemini-pro",
-            google_api_key=GOOGLE_API_KEY
-        )
+        model = ChatGoogleGenerativeAI(model="gemini-2.5-flash")
         summary_prompt = PromptTemplate(
             template="Summarize the following web page content in under 200 words:\n\n{text}",
             input_variables=['text']
@@ -60,10 +57,7 @@ def answer_question(text: str, question: str) -> str:
         if not GOOGLE_API_KEY:
             raise Exception("Google API key not configured")
             
-        model = ChatGoogleGenerativeAI(
-            model="gemini-pro",
-            google_api_key=GOOGLE_API_KEY
-        )
+        model = ChatGoogleGenerativeAI(model="gemini-2.5-flash")
         qa_prompt = PromptTemplate(
             template="Use the following content to answer the question.\n\nContent:\n{text}\n\nQuestion: {question}\n\nAnswer:",
             input_variables=['text', 'question']
@@ -127,3 +121,4 @@ if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8000))
 
     app.run(host='0.0.0.0', port=port, debug=False)
+
