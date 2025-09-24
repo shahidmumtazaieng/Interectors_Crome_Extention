@@ -1,11 +1,7 @@
-
+fastapi
+uvicorn
 langchain
 langchain-google-genai
 langchain-community
-flask
-flask-cors
-dotenv
-uvicorn
-fastapi
-
-
+python-dotenv
+google-generativeai

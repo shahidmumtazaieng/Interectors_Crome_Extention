@@ -1,79 +1,50 @@
 """
-Test script to verify that the API server is working correctly
+Test script for the Interectors backend API
 """
 
 import requests
-import json
+import os
+from dotenv import load_dotenv
 
-# Test URLs
-LOCAL_API_URL = "http://localhost:8000"
-STREAMLIT_API_URL = "https://interectorscromeextention-igrjcyl4beuxpt2xof4kmq.streamlit.app"
+# Load environment variables
+load_dotenv()
 
-# Test data
-test_url = "https://example.com"
-test_question = "What is this website about?"
+# API configuration
+BASE_URL = "http://localhost:8000"  # Change this to your deployed URL for testing deployed version
 
-def test_health_endpoint(base_url):
-    """Test the health endpoint"""
-    try:
-        response = requests.get(f"{base_url}/health")
-        print(f"Health check - Status Code: {response.status_code}")
-        if response.status_code == 200:
-            print("Health check successful!")
-            print(f"Response: {response.json()}")
-        else:
-            print(f"Health check failed: {response.text}")
-    except Exception as e:
-        print(f"Health check error: {e}")
+def test_health():
+    """Test the health check endpoint"""
+    response = requests.get(f"{BASE_URL}/health")
+    print("Health Check:", response.json())
 
-def test_summarize_endpoint(base_url):
+def test_summarize():
     """Test the summarize endpoint"""
-    try:
-        response = requests.post(
-            f"{base_url}/summarize",
-            json={"url": test_url},
-            headers={"Content-Type": "application/json"}
-        )
-        print(f"Summarize - Status Code: {response.status_code}")
-        if response.status_code == 200:
-            print("Summarize successful!")
-            print(f"Summary: {response.json().get('summary', 'No summary found')[:100]}...")
-        else:
-            print(f"Summarize failed: {response.text}")
-    except Exception as e:
-        print(f"Summarize error: {e}")
+    url = "https://en.wikipedia.org/wiki/Artificial_intelligence"
+    payload = {"url": url}
+    
+    response = requests.post(f"{BASE_URL}/summarize", json=payload)
+    print("\nSummarize Response:")
+    print(response.json())
 
-def test_qa_endpoint(base_url):
+def test_qa():
     """Test the QA endpoint"""
-    try:
-        response = requests.post(
-            f"{base_url}/qa",
-            json={"url": test_url, "question": test_question},
-            headers={"Content-Type": "application/json"}
-        )
-        print(f"QA - Status Code: {response.status_code}")
-        if response.status_code == 200:
-            print("QA successful!")
-            print(f"Answer: {response.json().get('answer', 'No answer found')[:100]}...")
-        else:
-            print(f"QA failed: {response.text}")
-    except Exception as e:
-        print(f"QA error: {e}")
+    url = "https://en.wikipedia.org/wiki/Artificial_intelligence"
+    payload = {
+        "url": url,
+        "question": "What is artificial intelligence?"
+    }
+    
+    response = requests.post(f"{BASE_URL}/qa", json=payload)
+    print("\nQA Response:")
+    print(response.json())
 
 if __name__ == "__main__":
-    print("Testing LOCAL API connection...")
+    print("Testing Interectors Backend API")
     print("=" * 40)
-    test_health_endpoint(LOCAL_API_URL)
-    print()
-    test_summarize_endpoint(LOCAL_API_URL)
-    print()
-    test_qa_endpoint(LOCAL_API_URL)
     
-    print("\n" + "=" * 50)
-    print("Testing STREAMLIT API connection...")
-    print("=" * 40)
-    test_health_endpoint(STREAMLIT_API_URL)
-    print()
-    test_summarize_endpoint(STREAMLIT_API_URL)
-    print()
-    test_qa_endpoint(STREAMLIT_API_URL)
+    try:
+        test_health()
+        test_summarize()
+        test_qa()
+    except Exception as e:
+        print(f"Error during testing: {e}")
