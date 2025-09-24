@@ -12,13 +12,6 @@ import sys
 # Load environment variables
 load_dotenv()
 
-# Check if this is an API request (when running as a module)
-if "STREAMLIT_API_MODE" in os.environ:
-    # API mode - handle requests directly
-    import sys
-    import json
-    from flask import Flask, request, jsonify
-    from flask_cors import CORS
     
     app = Flask(__name__)
     CORS(app, origins=["chrome-extension://*"])
@@ -368,3 +361,4 @@ else:
         unsafe_allow_html=True
 
     )
+
