@@ -6,4 +6,6 @@ flask
 flask-cors
 dotenv
 uvicorn
+fastapi
+
 
