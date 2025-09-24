@@ -1,7 +1,8 @@
-fastapi==0.104.1
-uvicorn[standard]==0.24.0
-langchain-community==0.3.2
-python-dotenv==1.0.0
-google-generativeai==0.5.4
-pydantic==2.5.0
-beautifulsoup4==4.12.2
+fastapi
+uvicorn
+langchain-community
+dotenv
+google-generativeai
+pydantic
+
+beautifulsoup4
